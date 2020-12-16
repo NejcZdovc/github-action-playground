@@ -6,5 +6,40 @@ on:
       version:
         description: 'Version of the release (example: 0.3.0)'
         required: true
-      name:
-        description: 'Name of the release'
+
+jobs:
+  create-release:
+    name: 'Updates package.json version'
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+
+    steps:
+      - name: Checkout the latest
+        uses: actions/checkout@v2
+    
+      - name: Modify package.json version
+        uses: MerthinTechnologies/edit-json-action@v1
+        with:
+          filename: './package.json'
+          key: 'version'
+          value: ${{ github.event.inputs.version }}
+        
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v5
+        with:
+          add: 'package.json'
+          branch: 'main'
+          message: Version bump to ${{ github.event.inputs.version }}
+    
+      - name: Add tag
+        run: git tag v${{ github.event.inputs.version }}
+      
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: ${{ github.event.inputs.version }} 
+          draft: false
+          prerelease: false
