@@ -1,0 +1,10 @@
+name: Release new version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of the release (example: 0.3.0)'
+        required: true
+      name:
+        description: 'Name of the release'
